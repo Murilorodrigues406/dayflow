@@ -1556,11 +1556,11 @@ if(isIOS && !isStandalone && !localStorage.getItem('df3_installed')){
 </script>
 
 <!-- ── SUPABASE AUTH ─────────────────────────────────── -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPA_URL = 'https://quycypnysdqifafzfili.supabase.co';
 const SUPA_KEY = 'sb_publishable_VtQ599vQGBvP5opaHGvaPg_UhsNYLgf';
-const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+const supa = window.supabase ? window.supabase.createClient(SUPA_URL, SUPA_KEY) : null;
 
 let currentUser = null;
 
@@ -1896,13 +1896,26 @@ function showTrialExpired(){
   document.body.appendChild(exp);
 }
 
-/* ── INIT AUTH ── */
+/* ── INIT AUTH CORRIGIDO ── */
 (async()=>{
-  const {data:{session}}=await supa.auth.getSession();
-  if(session){
-    await enterApp(session.user);
-  } else {
-    showAuthScreen();
+  try{
+    if(!window.supabase || !supa){
+      throw new Error('Supabase não carregou');
+    }
+
+    const {data:{session}}=await supa.auth.getSession();
+    if(session){
+      await enterApp(session.user);
+    } else {
+      showAuthScreen();
+    }
+  }catch(e){
+    console.error('Erro ao iniciar autenticação:', e);
+    // Segurança para não deixar a página branca caso o Supabase falhe
+    document.querySelector('.app').style.display='';
+    document.querySelector('.fab').style.display='';
+    document.querySelector('.bnav').style.display='';
+    showToast('⚠️ App aberto em modo teste. Verifique o Supabase.');
   }
 })();
 </script>
