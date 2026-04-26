@@ -343,6 +343,21 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;bac
 .pie-leg-label{flex:1;color:var(--text2);}
 .pie-leg-val{font-weight:700;color:var(--text);}
 </style>
+<!-- ── ONESIGNAL PUSH NOTIFICATIONS ── -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "a18f7248-c928-4d2e-b870-224df272ec58",
+      allowLocalhostAsSecureOrigin: true,
+      notifyButton: {
+        enable: false,
+      },
+    });
+  });
+</script>
+
 </head>
 <body>
 <div class="gb gb1"></div><div class="gb gb2"></div>
@@ -1651,6 +1666,92 @@ async function enterApp(user){
   showToast('🌿 Bem-vindo, '+localStorage.getItem('df3_fn')+'!');
   // Adiciona botão de sair no perfil
   addLogoutBtn();
+  // Solicita permissão de notificações após 5 segundos
+  setTimeout(setupPushNotifications, 5000);
+}
+
+/* ── PUSH NOTIFICATIONS ─────────────────────────── */
+async function setupPushNotifications(){
+  if(typeof OneSignal==='undefined'||!window.OneSignalDeferred) return;
+  
+  // Verifica se já pediu antes
+  if(localStorage.getItem('df3_push_asked')) return;
+  
+  // Mostra um banner customizado pedindo permissão
+  showPushPrompt();
+}
+
+function showPushPrompt(){
+  const prompt=document.createElement('div');
+  prompt.id='pushPrompt';
+  prompt.style.cssText=`
+    position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
+    width:calc(100% - 32px);max-width:400px;background:#fff;
+    border:2px solid #1a7a4a;border-radius:18px;padding:16px;
+    box-shadow:0 8px 32px rgba(26,122,74,.25);z-index:9000;
+    animation:slideUp .3s ease;font-family:'Cabinet Grotesk',sans-serif;
+  `;
+  prompt.innerHTML=`
+    <div style="display:flex;align-items:flex-start;gap:12px;">
+      <div style="font-size:32px;flex-shrink:0;">🔔</div>
+      <div style="flex:1;">
+        <div style="font-weight:800;font-size:14px;color:#0f2a1a;margin-bottom:4px;">
+          Receber lembretes do DayFlow?
+        </div>
+        <div style="font-size:12px;color:#4a7360;line-height:1.5;margin-bottom:12px;">
+          Nunca esqueça uma tarefa importante. Lembretes 3 dias e 1 dia antes + resumo diário pela manhã.
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="acceptPush()" style="
+            background:#1a7a4a;color:#fff;border:none;border-radius:9px;
+            padding:9px 16px;font-weight:700;font-size:12px;cursor:pointer;
+            font-family:'Cabinet Grotesk',sans-serif;flex:1;">
+            Ativar lembretes
+          </button>
+          <button onclick="dismissPush()" style="
+            background:#e8f3ec;color:#4a7360;border:none;border-radius:9px;
+            padding:9px 12px;font-weight:600;font-size:12px;cursor:pointer;
+            font-family:'Cabinet Grotesk',sans-serif;">
+            Agora não
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(prompt);
+}
+
+async function acceptPush(){
+  document.getElementById('pushPrompt')?.remove();
+  localStorage.setItem('df3_push_asked','1');
+  
+  if(window.OneSignalDeferred){
+    OneSignalDeferred.push(async function(OneSignal){
+      try{
+        const permission=await OneSignal.Notifications.requestPermission();
+        if(permission){
+          // Salva tags do usuário
+          const fn=localStorage.getItem('df3_fn')||'Usuário';
+          await OneSignal.User.addTag('first_name',fn);
+          if(currentUser?.email){
+            await OneSignal.User.addEmail(currentUser.email);
+          }
+          showToast('🔔 Lembretes ativados!');
+          localStorage.setItem('df3_push_active','1');
+        } else {
+          showToast('❌ Permissão negada');
+        }
+      }catch(e){
+        console.log('Erro push:',e);
+        showToast('❌ Não foi possível ativar');
+      }
+    });
+  }
+}
+
+function dismissPush(){
+  document.getElementById('pushPrompt')?.remove();
+  localStorage.setItem('df3_push_asked','1');
 }
 
 function addLogoutBtn(){
