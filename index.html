@@ -5,40 +5,44 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>DayFlow</title>
 
+<!-- ⚡ Pré-conexões para velocidade -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://quycypnysdqifafzfili.supabase.co">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://cdn.onesignal.com">
+
 <!-- PWA Android -->
 <link rel="manifest" id="pwa-manifest"/>
-<meta name="theme-color" content="#1a7a4a"/>
+<meta name="theme-color" content="#0d4f2c"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="application-name" content="DayFlow"/>
 <meta name="description" content="Seu dia com estratégia"/>
 
 <!-- PWA iOS / Safari -->
 <meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="DayFlow"/>
 <link rel="apple-touch-icon" id="appleIcon"/>
 
-<!-- Splash screen cor iOS -->
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-
-<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Cabinet+Grotesk:wght@300;400;500;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;600;700&family=Cabinet+Grotesk:wght@400;700;800&display=swap" rel="stylesheet"/>
 <style>
 :root {
-  /* ── LIGHT GREEN PALETTE ── */
-  --bg:#f0f7f2;
-  --s1:#ffffff;
-  --s2:#e8f3ec;
-  --s3:#d4eadb;
-  --border:#c3dfc9;
-  --border2:#a8d1b2;
+  /* ── ELEGANT GREEN PALETTE — Energia + Clareza ── */
+  --bg:#f7faf8;        /* fundo neutro suave */
+  --s1:#ffffff;        /* superfície principal */
+  --s2:#eef5f0;        /* superfície secundária */
+  --s3:#dcebe2;        /* superfície terciária */
+  --border:#d3e4d8;    /* bordas suaves */
+  --border2:#a8d1b2;   /* bordas destacadas */
 
-  /* greens */
-  --grn:#1a7a4a;    /* deep forest — primary accent */
-  --grn2:#27a96c;   /* mid green */
-  --grn3:#4dc98a;   /* bright mint */
-  --grn4:#d0f0dc;   /* pale mint surface */
+  /* greens — paleta principal elegante */
+  --grn:#0d4f2c;       /* verde floresta profundo — accent primário */
+  --grn2:#1a7a4a;      /* verde médio — secundário */
+  --grn3:#27a96c;      /* verde vibrante — destaques */
+  --grn4:#d0f0dc;      /* verde pálido — superfícies */
 
-  /* supporting accents (kept vivid for legibility on light) */
+  /* accents de apoio — vibrantes para boa legibilidade */
   --sky:#0e86c8;
   --rose:#e0184e;
   --violet:#6d28d9;
@@ -47,17 +51,18 @@
   --gold2:#d97706;
   --teal:#0d8c6a;
 
-  --text:#0f2a1a;
-  --text2:#4a7360;
-  --text3:#8cb09a;
+  /* textos com excelente contraste */
+  --text:#0a1f12;      /* texto principal — quase preto */
+  --text2:#2d4234;     /* texto secundário — escurecido para melhor leitura */
+  --text3:#5a7568;     /* texto terciário — escurecido para legibilidade */
 
   --r:16px;--r2:12px;
 
-  /* stage colours — slightly deeper for light bg */
+  /* cores dos estágios */
   --st-plan:#5b6df5;
   --st-conf:#b45309;
   --st-prog:#0e86c8;
-  --st-done:#1a7a4a;
+  --st-done:#0d4f2c;
   --st-cancel:#e0184e;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -636,7 +641,7 @@ const MONTHS=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Ago
 const CAT_L={manha:'🌅 Manhã',saude:'💪 Saúde',familia:'🏠 Família',estudo:'📚 Estudo',lazer:'🎮 Lazer',noite:'🌙 Noite',trabalho:'💼 Trabalho',reuniao:'🤝 Reunião',relatorio:'📊 Relatório',meta:'🎯 Meta',urgente:'🔥 Urgente'};
 const STG_L={planejado:'📋 Planejado',confirmado:'✅ Confirmado',em_andamento:'⚡ Em andamento',concluido:'🏁 Concluído',cancelado:'🚫 Cancelado'};
 const STG_O=['planejado','confirmado','em_andamento','concluido'];
-const CAT_CLR={manha:'#b45309',saude:'#27a96c',familia:'#0e86c8',estudo:'#6d28d9',lazer:'#d97706',noite:'#7c3aed',trabalho:'#0e86c8',reuniao:'#1d6fc4',relatorio:'#6d28d9',meta:'#1a7a4a',urgente:'#e0184e'};
+const CAT_CLR={manha:'#b45309',saude:'#27a96c',familia:'#0e86c8',estudo:'#6d28d9',lazer:'#d97706',noite:'#7c3aed',trabalho:'#0e86c8',reuniao:'#1d6fc4',relatorio:'#6d28d9',meta:'#0d4f2c',urgente:'#e0184e'};
 
 let evs=JSON.parse(localStorage.getItem('df3_evs')||'[]');
 let cur=new Date();
@@ -653,21 +658,11 @@ function daysBetween(s1,s2){return Math.round((parseLocal(s2)-parseLocal(s1))/86
 
 function seed(){
   if(evs.length)return;
-  const t=fmt(new Date()),d3=fmt(addD(new Date(),3)),d1=fmt(addD(new Date(),1)),d5=fmt(addD(new Date(),5));
+  const t=fmt(new Date());
   evs=[
-    {id:uid(),title:'Acordar & rotina matinal',desc:'Água, alongamento 10 min',time:'06:00',cat:'manha',view:'pessoal',date:t,stage:'confirmado',rem:'none',done:false},
-    {id:uid(),title:'Exercício físico',desc:'30 min caminhada ou musculação',time:'07:00',cat:'saude',view:'pessoal',date:t,stage:'planejado',rem:'none',done:false},
-    {id:uid(),title:'Estudo — Python & SQL',desc:'45 min focados antes do trabalho',time:'08:00',cat:'estudo',view:'pessoal',date:t,stage:'em_andamento',rem:'none',done:false},
-    {id:uid(),title:'Almoço com família',desc:'Desconectar do trabalho',time:'12:30',cat:'familia',view:'pessoal',date:t,stage:'confirmado',rem:'none',done:false},
-    {id:uid(),title:'Estudo — Dev de sistemas',desc:'Projetos pessoais para Home Office',time:'20:00',cat:'estudo',view:'pessoal',date:t,stage:'planejado',rem:'none',done:false},
-    {id:uid(),title:'Dormir',desc:'Mínimo 7h de sono reparador',time:'22:30',cat:'noite',view:'pessoal',date:t,stage:'planejado',rem:'none',done:false},
-    {id:uid(),title:'Início do expediente',desc:'Checar equipes e indicadores',time:'09:00',cat:'trabalho',view:'trabalho',date:t,stage:'confirmado',rem:'none',done:false},
-    {id:uid(),title:'Reunião de supervisores',desc:'Pauta: metas mensais e escala',time:'10:00',cat:'reuniao',view:'trabalho',date:t,stage:'confirmado',rem:'r1',done:false},
-    {id:uid(),title:'Relatório semanal',desc:'Consolidar dados de desempenho',time:'11:00',cat:'relatorio',view:'trabalho',date:t,stage:'planejado',rem:'none',done:false},
-    {id:uid(),title:'URGENTE — Tarefa importante',desc:'Resolver pendência do dia',time:'15:00',cat:'urgente',view:'trabalho',date:t,stage:'em_andamento',rem:'none',done:false},
-    {id:uid(),title:'Apresentação para diretoria',desc:'Resultados Q2 e projeção Q3',time:'09:00',cat:'reuniao',view:'trabalho',date:d3,stage:'planejado',rem:'r3',done:false},
-    {id:uid(),title:'Consulta médica',desc:'Check-up anual',time:'14:00',cat:'saude',view:'pessoal',date:d1,stage:'confirmado',rem:'r1',done:false},
-    {id:uid(),title:'Entrega do projeto final',desc:'Módulo de análise de dados',time:'18:00',cat:'estudo',view:'pessoal',date:d5,stage:'planejado',rem:'r3',done:false},
+    {id:uid(),title:'Bem-vindo ao DayFlow! 🌿',desc:'Toque no + para criar suas tarefas',time:'08:00',cat:'manha',view:'pessoal',date:t,stage:'planejado',rem:'none',done:false},
+    {id:uid(),title:'Explorar Finanças',desc:'Veja a aba 💰 no menu inferior',time:'10:00',cat:'estudo',view:'pessoal',date:t,stage:'planejado',rem:'none',done:false},
+    {id:uid(),title:'Personalizar perfil',desc:'Adicione sua foto na aba 👤 Perfil',time:'12:00',cat:'lazer',view:'pessoal',date:t,stage:'planejado',rem:'none',done:false},
   ];
   save();
 }
@@ -766,7 +761,7 @@ function renderFinScreen(show){
 let finTxs = JSON.parse(localStorage.getItem('df3_fin')||'[]');
 let curFinTipo='entrada';
 const FIN_CAT_LABELS={salario:'💼 Salário',rendaextra:'💰 Renda Extra',alimentacao:'🍽️ Alimentação',transporte:'🚗 Transporte',moradia:'🏠 Moradia',saude:'💊 Saúde',lazer:'🎮 Lazer',educacao:'📚 Educação',outros:'📦 Outros'};
-const FIN_CAT_COLORS={salario:'#1a7a4a',rendaextra:'#27a96c',alimentacao:'#d97706',transporte:'#0e86c8',moradia:'#6d28d9',saude:'#e0184e',lazer:'#fb8500',educacao:'#5b6df5',outros:'#8cb09a'};
+const FIN_CAT_COLORS={salario:'#0d4f2c',rendaextra:'#27a96c',alimentacao:'#d97706',transporte:'#0e86c8',moradia:'#6d28d9',saude:'#e0184e',lazer:'#fb8500',educacao:'#5b6df5',outros:'#5a7568'};
 
 function saveFin(){localStorage.setItem('df3_fin',JSON.stringify(finTxs));}
 
@@ -795,7 +790,7 @@ function renderFinance(){
     const start=polarToXY(cx,cy,r,startAngle);
     const end=polarToXY(cx,cy,r,startAngle+angle);
     const large=angle>180?1:0;
-    const color=FIN_CAT_COLORS[cat]||'#8cb09a';
+    const color=FIN_CAT_COLORS[cat]||'#5a7568';
     svgPaths+=`<path d="M${cx},${cy} L${start.x},${start.y} A${r},${r} 0 ${large},1 ${end.x},${end.y} Z" fill="${color}" opacity="0.85"/>`;
     startAngle+=angle;
   });
@@ -831,14 +826,14 @@ function renderFinance(){
       ${catEntries.length?`
       <div class="pie-wrap">
         <svg width="140" height="140" viewBox="0 0 140 140" style="flex-shrink:0;">
-          ${svgPaths||`<circle cx="70" cy="70" r="60" fill="#e8f3ec"/>`}
+          ${svgPaths||`<circle cx="70" cy="70" r="60" fill="#eef5f0"/>`}
           <circle cx="70" cy="70" r="35" fill="white"/>
-          <text x="70" y="74" text-anchor="middle" font-size="11" font-weight="700" fill="#1a7a4a">Gastos</text>
+          <text x="70" y="74" text-anchor="middle" font-size="11" font-weight="700" fill="#0d4f2c">Gastos</text>
         </svg>
         <div class="pie-legend">
           ${catEntries.slice(0,5).map(([cat,val])=>`
             <div class="pie-leg-item">
-              <div class="pie-leg-dot" style="background:${FIN_CAT_COLORS[cat]||'#8cb09a'}"></div>
+              <div class="pie-leg-dot" style="background:${FIN_CAT_COLORS[cat]||'#5a7568'}"></div>
               <div class="pie-leg-label">${FIN_CAT_LABELS[cat]||cat}</div>
               <div class="pie-leg-val">R$ ${val.toFixed(0)}</div>
             </div>`).join('')}
@@ -1286,13 +1281,13 @@ function showWelcome(){
   wel.id='welcomeScreen';
   wel.style.cssText=`
     position:fixed;inset:0;z-index:9999;
-    background:linear-gradient(160deg,#e8f5ee 0%,#f0f7f2 50%,#d4eadb 100%);
+    background:linear-gradient(160deg,#eef5f0 0%,#f7faf8 50%,#dcebe2 100%);
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     padding:32px 28px;font-family:'Cabinet Grotesk',sans-serif;
   `;
   wel.innerHTML=`
     <!-- Logo -->
-    <div style="width:80px;height:80px;border-radius:22px;background:#1a7a4a;
+    <div style="width:80px;height:80px;border-radius:22px;background:#0d4f2c;
       display:flex;align-items:center;justify-content:center;margin-bottom:24px;
       box-shadow:0 8px 32px rgba(26,122,74,.3);">
       <span style="font-family:'Clash Display',sans-serif;font-weight:800;font-size:28px;color:#fff;letter-spacing:-1px;">DF</span>
@@ -1300,14 +1295,14 @@ function showWelcome(){
 
     <!-- Título -->
     <div style="font-family:'Clash Display',sans-serif;font-weight:800;font-size:32px;
-      color:#0f2a1a;letter-spacing:-1px;margin-bottom:6px;text-align:center;">
+      color:#0a1f12;letter-spacing:-1px;margin-bottom:6px;text-align:center;">
       Bem-vindo ao
     </div>
     <div style="font-family:'Clash Display',sans-serif;font-weight:800;font-size:32px;
-      color:#1a7a4a;letter-spacing:-1px;margin-bottom:10px;">
+      color:#0d4f2c;letter-spacing:-1px;margin-bottom:10px;">
       DayFlow 🌿
     </div>
-    <div style="font-size:14px;color:#4a7360;text-align:center;margin-bottom:36px;line-height:1.5;font-weight:400;">
+    <div style="font-size:14px;color:#2d4234;text-align:center;margin-bottom:36px;line-height:1.5;font-weight:400;">
       Seu planejador de vida completo.<br>Vamos personalizar para você!
     </div>
 
@@ -1315,40 +1310,40 @@ function showWelcome(){
     <div style="width:100%;max-width:340px;display:flex;flex-direction:column;gap:12px;">
 
       <div>
-        <div style="font-size:10px;font-weight:800;color:#4a7360;letter-spacing:1px;
+        <div style="font-size:10px;font-weight:800;color:#2d4234;letter-spacing:1px;
           text-transform:uppercase;margin-bottom:6px;">Seu primeiro nome</div>
         <input id="wFirstName" type="text" placeholder="Ex: João" maxlength="30"
-          style="width:100%;background:#fff;border:2px solid #c3dfc9;border-radius:12px;
-          padding:13px 16px;color:#0f2a1a;font-family:'Cabinet Grotesk',sans-serif;
+          style="width:100%;background:#fff;border:2px solid #d3e4d8;border-radius:12px;
+          padding:13px 16px;color:#0a1f12;font-family:'Cabinet Grotesk',sans-serif;
           font-size:16px;outline:none;transition:border-color .2s;"
-          onfocus="this.style.borderColor='#1a7a4a'"
-          onblur="this.style.borderColor='#c3dfc9'"/>
+          onfocus="this.style.borderColor='#0d4f2c'"
+          onblur="this.style.borderColor='#d3e4d8'"/>
       </div>
 
       <div>
-        <div style="font-size:10px;font-weight:800;color:#4a7360;letter-spacing:1px;
+        <div style="font-size:10px;font-weight:800;color:#2d4234;letter-spacing:1px;
           text-transform:uppercase;margin-bottom:6px;">Sobrenome (opcional)</div>
         <input id="wLastName" type="text" placeholder="Ex: Silva" maxlength="30"
-          style="width:100%;background:#fff;border:2px solid #c3dfc9;border-radius:12px;
-          padding:13px 16px;color:#0f2a1a;font-family:'Cabinet Grotesk',sans-serif;
+          style="width:100%;background:#fff;border:2px solid #d3e4d8;border-radius:12px;
+          padding:13px 16px;color:#0a1f12;font-family:'Cabinet Grotesk',sans-serif;
           font-size:16px;outline:none;transition:border-color .2s;"
-          onfocus="this.style.borderColor='#1a7a4a'"
-          onblur="this.style.borderColor='#c3dfc9'"/>
+          onfocus="this.style.borderColor='#0d4f2c'"
+          onblur="this.style.borderColor='#d3e4d8'"/>
       </div>
 
       <div>
-        <div style="font-size:10px;font-weight:800;color:#4a7360;letter-spacing:1px;
+        <div style="font-size:10px;font-weight:800;color:#2d4234;letter-spacing:1px;
           text-transform:uppercase;margin-bottom:6px;">Sua frase do dia (opcional)</div>
         <input id="wMotiv" type="text" placeholder="Ex: Foco, força e fé!" maxlength="60"
-          style="width:100%;background:#fff;border:2px solid #c3dfc9;border-radius:12px;
-          padding:13px 16px;color:#0f2a1a;font-family:'Cabinet Grotesk',sans-serif;
+          style="width:100%;background:#fff;border:2px solid #d3e4d8;border-radius:12px;
+          padding:13px 16px;color:#0a1f12;font-family:'Cabinet Grotesk',sans-serif;
           font-size:16px;outline:none;transition:border-color .2s;"
-          onfocus="this.style.borderColor='#1a7a4a'"
-          onblur="this.style.borderColor='#c3dfc9'"/>
+          onfocus="this.style.borderColor='#0d4f2c'"
+          onblur="this.style.borderColor='#d3e4d8'"/>
       </div>
 
       <button onclick="finishWelcome()"
-        style="width:100%;background:#1a7a4a;color:#fff;border:none;border-radius:12px;
+        style="width:100%;background:#0d4f2c;color:#fff;border:none;border-radius:12px;
         padding:15px;font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:16px;
         cursor:pointer;margin-top:8px;box-shadow:0 6px 20px rgba(26,122,74,.35);
         transition:opacity .2s;">
@@ -1357,7 +1352,7 @@ function showWelcome(){
 
     </div>
 
-    <div style="margin-top:24px;font-size:11px;color:#8cb09a;text-align:center;">
+    <div style="margin-top:24px;font-size:11px;color:#5a7568;text-align:center;">
       Seus dados ficam salvos só no seu celular 🔒
     </div>
   `;
@@ -1424,7 +1419,7 @@ updGcal();updHeader();render();
 
 // 1. Gera o ícone SVG como data URL (verde com "DF")
 const iconSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#1a7a4a"/>
+  <rect width="512" height="512" rx="112" fill="#0d4f2c"/>
   <rect x="60" y="60" width="392" height="392" rx="80" fill="#27a96c" opacity=".3"/>
   <text x="256" y="310" text-anchor="middle" font-family="Georgia,serif" font-weight="700"
     font-size="200" fill="#ffffff" letter-spacing="-8">DF</text>
@@ -1443,8 +1438,8 @@ const manifest = {
   start_url: './',
   display: 'standalone',
   orientation: 'portrait',
-  background_color: '#f0f7f2',
-  theme_color: '#1a7a4a',
+  background_color: '#f7faf8',
+  theme_color: '#0d4f2c',
   lang: 'pt-BR',
   icons: [
     { src: iconURL, sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable' },
@@ -1495,17 +1490,17 @@ function showInstallBanner(){
       position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
       width:calc(100% - 32px);max-width:400px;border-radius:16px;
       box-shadow:0 8px 32px rgba(26,122,74,.18);z-index:9000;animation:fi .3s ease;">
-      <div style="width:44px;height:44px;border-radius:12px;background:#1a7a4a;
+      <div style="width:44px;height:44px;border-radius:12px;background:#0d4f2c;
         display:flex;align-items:center;justify-content:center;flex-shrink:0;
         font-family:Georgia,serif;font-weight:700;font-size:16px;color:#fff;letter-spacing:-1px;">DF</div>
       <div style="flex:1;min-width:0;">
-        <div style="font-weight:700;font-size:13px;color:#0f2a1a;">Instalar DayFlow</div>
-        <div style="font-size:11px;color:#4a7360;margin-top:1px;">Adicionar à tela inicial</div>
+        <div style="font-weight:700;font-size:13px;color:#0a1f12;">Instalar DayFlow</div>
+        <div style="font-size:11px;color:#2d4234;margin-top:1px;">Adicionar à tela inicial</div>
       </div>
-      <button onclick="doInstall()" style="background:#1a7a4a;color:#fff;border:none;
+      <button onclick="doInstall()" style="background:#0d4f2c;color:#fff;border:none;
         border-radius:10px;padding:8px 14px;font-size:12px;font-weight:800;cursor:pointer;
         font-family:'Cabinet Grotesk',sans-serif;white-space:nowrap;">Instalar</button>
-      <button onclick="dismissInstall()" style="background:none;border:none;color:#8cb09a;
+      <button onclick="dismissInstall()" style="background:none;border:none;color:#5a7568;
         font-size:20px;cursor:pointer;padding:4px;line-height:1;">×</button>
     </div>`;
   document.body.appendChild(banner);
@@ -1543,14 +1538,14 @@ if(isIOS && !isStandalone && !localStorage.getItem('df3_installed')){
         box-shadow:0 8px 32px rgba(26,122,74,.18);z-index:9000;animation:fi .3s ease;">
         <div style="font-size:26px;flex-shrink:0;">📲</div>
         <div style="flex:1;">
-          <div style="font-weight:700;font-size:13px;color:#0f2a1a;margin-bottom:4px;">Instalar no iPhone</div>
-          <div style="font-size:11px;color:#4a7360;line-height:1.5;">
+          <div style="font-weight:700;font-size:13px;color:#0a1f12;margin-bottom:4px;">Instalar no iPhone</div>
+          <div style="font-size:11px;color:#2d4234;line-height:1.5;">
             Toque em <strong>Compartilhar</strong> ↑ no Safari<br>
             depois em <strong>"Adicionar à Tela Início"</strong>
           </div>
         </div>
         <button onclick="this.closest('div').parentElement.remove();localStorage.setItem('df3_installed','1')"
-          style="background:none;border:none;color:#8cb09a;font-size:20px;cursor:pointer;padding:4px;line-height:1;flex-shrink:0;">×</button>
+          style="background:none;border:none;color:#5a7568;font-size:20px;cursor:pointer;padding:4px;line-height:1;flex-shrink:0;">×</button>
       </div>`;
     document.body.appendChild(tip);
   }, 3000);
@@ -1558,7 +1553,7 @@ if(isIOS && !isStandalone && !localStorage.getItem('df3_installed')){
 </script>
 
 <!-- ── SUPABASE AUTH ─────────────────────────────────── -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 <script>
 const SUPA_URL = 'https://quycypnysdqifafzfili.supabase.co';
 const SUPA_KEY = 'sb_publishable_VtQ599vQGBvP5opaHGvaPg_UhsNYLgf';
@@ -1568,23 +1563,23 @@ let currentUser = null;
 
 /* ── ESTILOS DA AUTH ── */
 const authStyles = `
-.auth-screen{position:fixed;inset:0;z-index:99999;background:linear-gradient(160deg,#e8f5ee,#f0f7f2,#d4eadb);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 24px;font-family:'Cabinet Grotesk',sans-serif;}
-.auth-logo{width:72px;height:72px;border-radius:20px;background:#1a7a4a;display:flex;align-items:center;justify-content:center;margin-bottom:20px;box-shadow:0 8px 32px rgba(26,122,74,.3);}
+.auth-screen{position:fixed;inset:0;z-index:99999;background:linear-gradient(160deg,#eef5f0,#f7faf8,#dcebe2);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 24px;font-family:'Cabinet Grotesk',sans-serif;}
+.auth-logo{width:72px;height:72px;border-radius:20px;background:#0d4f2c;display:flex;align-items:center;justify-content:center;margin-bottom:20px;box-shadow:0 8px 32px rgba(26,122,74,.3);}
 .auth-logo span{font-family:'Clash Display',sans-serif;font-weight:800;font-size:26px;color:#fff;letter-spacing:-1px;}
-.auth-title{font-family:'Clash Display',sans-serif;font-weight:800;font-size:28px;color:#0f2a1a;letter-spacing:-1px;margin-bottom:4px;text-align:center;}
-.auth-sub{font-size:13px;color:#4a7360;text-align:center;margin-bottom:28px;line-height:1.5;}
-.auth-box{width:100%;max-width:340px;background:#fff;border-radius:20px;padding:24px 20px;box-shadow:0 8px 40px rgba(26,122,74,.1);border:1.5px solid #c3dfc9;}
-.auth-tabs{display:flex;gap:0;margin-bottom:20px;background:#e8f3ec;border-radius:10px;padding:3px;}
-.auth-tab{flex:1;padding:8px;text-align:center;font-size:13px;font-weight:700;cursor:pointer;border-radius:8px;color:#4a7360;transition:all .2s;}
-.auth-tab.active{background:#1a7a4a;color:#fff;}
-.auth-input{width:100%;background:#f0f7f2;border:1.5px solid #c3dfc9;border-radius:10px;padding:12px 14px;color:#0f2a1a;font-family:'Cabinet Grotesk',sans-serif;font-size:15px;outline:none;margin-bottom:10px;box-sizing:border-box;transition:border-color .2s;}
-.auth-input:focus{border-color:#1a7a4a;}
-.auth-btn{width:100%;background:#1a7a4a;color:#fff;border:none;border-radius:10px;padding:14px;font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:15px;cursor:pointer;margin-top:4px;box-shadow:0 4px 16px rgba(26,122,74,.3);transition:opacity .2s;}
+.auth-title{font-family:'Clash Display',sans-serif;font-weight:800;font-size:28px;color:#0a1f12;letter-spacing:-1px;margin-bottom:4px;text-align:center;}
+.auth-sub{font-size:13px;color:#2d4234;text-align:center;margin-bottom:28px;line-height:1.5;}
+.auth-box{width:100%;max-width:340px;background:#fff;border-radius:20px;padding:24px 20px;box-shadow:0 8px 40px rgba(26,122,74,.1);border:1.5px solid #d3e4d8;}
+.auth-tabs{display:flex;gap:0;margin-bottom:20px;background:#eef5f0;border-radius:10px;padding:3px;}
+.auth-tab{flex:1;padding:8px;text-align:center;font-size:13px;font-weight:700;cursor:pointer;border-radius:8px;color:#2d4234;transition:all .2s;}
+.auth-tab.active{background:#0d4f2c;color:#fff;}
+.auth-input{width:100%;background:#f7faf8;border:1.5px solid #d3e4d8;border-radius:10px;padding:12px 14px;color:#0a1f12;font-family:'Cabinet Grotesk',sans-serif;font-size:15px;outline:none;margin-bottom:10px;box-sizing:border-box;transition:border-color .2s;}
+.auth-input:focus{border-color:#0d4f2c;}
+.auth-btn{width:100%;background:#0d4f2c;color:#fff;border:none;border-radius:10px;padding:14px;font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:15px;cursor:pointer;margin-top:4px;box-shadow:0 4px 16px rgba(26,122,74,.3);transition:opacity .2s;}
 .auth-btn:hover{opacity:.88;}
 .auth-btn:disabled{opacity:.5;cursor:not-allowed;}
 .auth-error{background:#fef0f0;border:1px solid #fca5a5;border-radius:8px;padding:10px 12px;font-size:12px;color:#dc2626;margin-bottom:10px;display:none;}
-.auth-trial{background:#e8f5ee;border:1px solid #a8d1b2;border-radius:8px;padding:10px 12px;font-size:11px;color:#1a7a4a;text-align:center;margin-top:12px;font-weight:600;}
-.auth-footer{margin-top:16px;font-size:11px;color:#8cb09a;text-align:center;}
+.auth-trial{background:#eef5f0;border:1px solid #a8d1b2;border-radius:8px;padding:10px 12px;font-size:11px;color:#0d4f2c;text-align:center;margin-top:12px;font-weight:600;}
+.auth-footer{margin-top:16px;font-size:11px;color:#5a7568;text-align:center;}
 `;
 const styleEl=document.createElement('style');
 styleEl.textContent=authStyles;
@@ -1614,8 +1609,13 @@ function showAuthScreen(){
       <div id="loginForm">
         <input class="auth-input" id="loginEmail" type="email" placeholder="Seu email"/>
         <input class="auth-input" id="loginPass" type="password" placeholder="Sua senha"/>
+        <!-- LEMBRAR DE MIM -->
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <input type="checkbox" id="rememberMe" style="width:16px;height:16px;accent-color:#0d4f2c;cursor:pointer;" checked/>
+          <label for="rememberMe" style="font-size:13px;color:#2d4234;cursor:pointer;font-weight:600;">Lembrar de mim</label>
+        </div>
         <button class="auth-btn" id="loginBtn" onclick="doLogin()">Entrar →</button>
-        <div class="auth-footer">Esqueceu a senha? <span style="color:#1a7a4a;cursor:pointer;font-weight:700;" onclick="doReset()">Redefinir</span></div>
+        <div class="auth-footer">Esqueceu a senha? <span style="color:#0d4f2c;cursor:pointer;font-weight:700;" onclick="doReset()">Redefinir</span></div>
       </div>
       <!-- CADASTRO -->
       <div id="cadastroForm" style="display:none;">
@@ -1630,6 +1630,30 @@ function showAuthScreen(){
     <div class="auth-footer" style="margin-top:16px;">🔒 Seus dados são privados e seguros</div>
   `;
   document.body.appendChild(scr);
+
+  // Auto-preenche credenciais salvas
+  const savedEmail=localStorage.getItem('df3_saved_email');
+  const savedPass=localStorage.getItem('df3_saved_pass');
+  if(savedEmail && savedPass){
+    document.getElementById('loginEmail').value=savedEmail;
+    document.getElementById('loginPass').value=savedPass;
+    document.getElementById('rememberMe').checked=true;
+    // Login automático
+    setTimeout(async()=>{
+      const btn=document.getElementById('loginBtn');
+      if(btn){
+        btn.disabled=true;
+        btn.textContent='Entrando...';
+        const {data,error}=await supa.auth.signInWithPassword({email:savedEmail,password:savedPass});
+        if(!error && data.user){
+          await enterApp(data.user);
+        } else {
+          btn.disabled=false;
+          btn.textContent='Entrar →';
+        }
+      }
+    },800);
+  }
 }
 
 function switchTab(tab){
@@ -1648,11 +1672,20 @@ function showAuthError(msg){
 async function doLogin(){
   const email=document.getElementById('loginEmail').value.trim();
   const pass=document.getElementById('loginPass').value;
+  const remember=document.getElementById('rememberMe').checked;
   if(!email||!pass){showAuthError('Preencha email e senha!');return;}
   const btn=document.getElementById('loginBtn');
   btn.disabled=true;btn.textContent='Entrando...';
   const {data,error}=await supa.auth.signInWithPassword({email,password:pass});
   if(error){showAuthError('Email ou senha incorretos!');btn.disabled=false;btn.textContent='Entrar →';return;}
+  // Salva credenciais se "lembrar de mim" estiver marcado
+  if(remember){
+    localStorage.setItem('df3_saved_email',email);
+    localStorage.setItem('df3_saved_pass',pass);
+  } else {
+    localStorage.removeItem('df3_saved_email');
+    localStorage.removeItem('df3_saved_pass');
+  }
   await enterApp(data.user);
 }
 
@@ -1681,6 +1714,9 @@ async function doCadastro(){
     // Salva localmente também
     localStorage.setItem('df3_fn',nome);
     localStorage.setItem('df3_ln',sobrenome);
+    // Salva credenciais para login automático nas próximas vezes
+    localStorage.setItem('df3_saved_email',email);
+    localStorage.setItem('df3_saved_pass',pass);
     await enterApp(data.user);
   }
 }
@@ -1739,7 +1775,7 @@ function showPushPrompt(){
   prompt.style.cssText=`
     position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
     width:calc(100% - 32px);max-width:400px;background:#fff;
-    border:2px solid #1a7a4a;border-radius:18px;padding:16px;
+    border:2px solid #0d4f2c;border-radius:18px;padding:16px;
     box-shadow:0 8px 32px rgba(26,122,74,.25);z-index:9000;
     animation:slideUp .3s ease;font-family:'Cabinet Grotesk',sans-serif;
   `;
@@ -1747,21 +1783,21 @@ function showPushPrompt(){
     <div style="display:flex;align-items:flex-start;gap:12px;">
       <div style="font-size:32px;flex-shrink:0;">🔔</div>
       <div style="flex:1;">
-        <div style="font-weight:800;font-size:14px;color:#0f2a1a;margin-bottom:4px;">
+        <div style="font-weight:800;font-size:14px;color:#0a1f12;margin-bottom:4px;">
           Receber lembretes do DayFlow?
         </div>
-        <div style="font-size:12px;color:#4a7360;line-height:1.5;margin-bottom:12px;">
+        <div style="font-size:12px;color:#2d4234;line-height:1.5;margin-bottom:12px;">
           Nunca esqueça uma tarefa importante. Lembretes 3 dias e 1 dia antes + resumo diário pela manhã.
         </div>
         <div style="display:flex;gap:8px;">
           <button onclick="acceptPush()" style="
-            background:#1a7a4a;color:#fff;border:none;border-radius:9px;
+            background:#0d4f2c;color:#fff;border:none;border-radius:9px;
             padding:9px 16px;font-weight:700;font-size:12px;cursor:pointer;
             font-family:'Cabinet Grotesk',sans-serif;flex:1;">
             Ativar lembretes
           </button>
           <button onclick="dismissPush()" style="
-            background:#e8f3ec;color:#4a7360;border:none;border-radius:9px;
+            background:#eef5f0;color:#2d4234;border:none;border-radius:9px;
             padding:9px 12px;font-weight:600;font-size:12px;cursor:pointer;
             font-family:'Cabinet Grotesk',sans-serif;">
             Agora não
@@ -1794,7 +1830,6 @@ async function acceptPush(){
           showToast('❌ Permissão negada');
         }
       }catch(e){
-        console.log('Erro push:',e);
         showToast('❌ Não foi possível ativar');
       }
     });
@@ -1847,12 +1882,12 @@ function showTrialExpired(){
     <div class="auth-sub">Seus 7 dias grátis acabaram.<br>Continue usando o DayFlow!</div>
     <div class="auth-box" style="text-align:center;">
       <div style="font-size:48px;margin-bottom:12px;">🌿</div>
-      <div style="font-size:15px;font-weight:700;color:#0f2a1a;margin-bottom:6px;">Assine o DayFlow Pro</div>
-      <div style="font-size:13px;color:#4a7360;margin-bottom:20px;">Acesso completo por apenas</div>
-      <div style="font-size:36px;font-weight:800;color:#1a7a4a;margin-bottom:4px;">R$ 19<span style="font-size:16px;">/mês</span></div>
-      <div style="font-size:11px;color:#8cb09a;margin-bottom:20px;">Cancele quando quiser</div>
+      <div style="font-size:15px;font-weight:700;color:#0a1f12;margin-bottom:6px;">Assine o DayFlow Pro</div>
+      <div style="font-size:13px;color:#2d4234;margin-bottom:20px;">Acesso completo por apenas</div>
+      <div style="font-size:36px;font-weight:800;color:#0d4f2c;margin-bottom:4px;">R$ 19<span style="font-size:16px;">/mês</span></div>
+      <div style="font-size:11px;color:#5a7568;margin-bottom:20px;">Cancele quando quiser</div>
       <button class="auth-btn" onclick="showToast('💳 Pagamento em breve!')">Assinar agora →</button>
-      <div style="margin-top:12px;font-size:11px;color:#8cb09a;cursor:pointer;" onclick="doLogout()">Sair da conta</div>
+      <div style="margin-top:12px;font-size:11px;color:#5a7568;cursor:pointer;" onclick="doLogout()">Sair da conta</div>
     </div>
   `;
   document.body.appendChild(exp);
