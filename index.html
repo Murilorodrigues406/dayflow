@@ -856,8 +856,8 @@ function renderFinance(){
           </div>
           <div style="display:flex;align-items:center;gap:6px;">
             <div class="fin-tx-val ${t.tipo==='entrada'?'e':'s'}">${t.tipo==='entrada'?'+':'-'}R$ ${t.val.toFixed(2).replace('.',',')}</div>
-            <button onclick="editFinTx('${t.id}')" style="background:var(--pale);border:none;border-radius:7px;padding:5px 7px;cursor:pointer;font-size:12px;" title="Editar">✏️</button>
-            <button onclick="deleteFinTx('${t.id}')" style="background:#fef0f0;border:none;border-radius:7px;padding:5px 7px;cursor:pointer;font-size:12px;" title="Excluir">🗑️</button>
+            <button onclick="editFinTx('${t.id}')" style="background:var(--pale);border:none;border-radius:7px;padding:5px 7px;cursor:pointer;font-size:12px;" title="Editar">✏</button>
+            <button onclick="deleteFinTx('${t.id}')" style="background:#fef0f0;border:none;border-radius:7px;padding:5px 7px;cursor:pointer;font-size:12px;" title="Excluir">🗑</button>
           </div>
         </div>`).join(''):'<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px;">Nenhuma transação ainda</div>'}
     </div>
@@ -950,6 +950,8 @@ function updateFinTx(id){
   showToast('✅ Transação atualizada!');
   renderFinance();
 }
+
+function setPeriod(p){
   document.querySelectorAll('.period-btn').forEach(b=>b.classList.toggle('active',b.dataset.p===p));
   vt=p;render();
 }
