@@ -1265,9 +1265,7 @@ function loadName(){
   const fn=localStorage.getItem('df3_fn');
   const ln=localStorage.getItem('df3_ln');
   const mo=localStorage.getItem('df3_mo');
-  if(!fn){
-    showWelcome();
-  } else {
+  if(fn){
     applyName(fn,ln||'',mo||'');
   }
 }
@@ -1414,7 +1412,10 @@ if(av){
   document.getElementById('avImg').style.display='block';
   document.getElementById('avPh').style.display='none';
 }
-loadName();
+// Esconde o app até verificação do Supabase
+document.querySelector('.app').style.display='none';
+document.querySelector('.fab').style.display='none';
+document.querySelector('.bnav').style.display='none';
 updGcal();updHeader();render();
 
 /* ── PWA SETUP ─────────────────────────────────────── */
