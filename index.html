@@ -477,7 +477,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;bac
     <div class="fg"><label>Categoria</label>
       <select id="fFinCat">
         <option value="salario">💼 Salário</option>
-        <option value="freelance">💻 Freelance</option>
+        <option value="rendaextra">💰 Renda Extra</option>
         <option value="alimentacao">🍽️ Alimentação</option>
         <option value="transporte">🚗 Transporte</option>
         <option value="moradia">🏠 Moradia</option>
@@ -765,8 +765,8 @@ function renderFinScreen(show){
 // ── FINANCE DATA ──
 let finTxs = JSON.parse(localStorage.getItem('df3_fin')||'[]');
 let curFinTipo='entrada';
-const FIN_CAT_LABELS={salario:'💼 Salário',freelance:'💻 Freelance',alimentacao:'🍽️ Alimentação',transporte:'🚗 Transporte',moradia:'🏠 Moradia',saude:'💊 Saúde',lazer:'🎮 Lazer',educacao:'📚 Educação',outros:'📦 Outros'};
-const FIN_CAT_COLORS={salario:'#1a7a4a',freelance:'#27a96c',alimentacao:'#d97706',transporte:'#0e86c8',moradia:'#6d28d9',saude:'#e0184e',lazer:'#fb8500',educacao:'#5b6df5',outros:'#8cb09a'};
+const FIN_CAT_LABELS={salario:'💼 Salário',rendaextra:'💰 Renda Extra',alimentacao:'🍽️ Alimentação',transporte:'🚗 Transporte',moradia:'🏠 Moradia',saude:'💊 Saúde',lazer:'🎮 Lazer',educacao:'📚 Educação',outros:'📦 Outros'};
+const FIN_CAT_COLORS={salario:'#1a7a4a',rendaextra:'#27a96c',alimentacao:'#d97706',transporte:'#0e86c8',moradia:'#6d28d9',saude:'#e0184e',lazer:'#fb8500',educacao:'#5b6df5',outros:'#8cb09a'};
 
 function saveFin(){localStorage.setItem('df3_fin',JSON.stringify(finTxs));}
 
@@ -852,14 +852,18 @@ function renderFinance(){
         <div class="fin-card-title" style="margin-bottom:0;">Transações recentes</div>
         <button onclick="openFinOv()" style="background:var(--grn);color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:800;cursor:pointer;font-family:'Cabinet Grotesk',sans-serif;">+ Novo</button>
       </div>
-      ${txRecentes.length?txRecentes.map(t=>`
-        <div class="fin-tx">
+      ${txRecentes.length?txRecentes.map((t,idx)=>`
+        <div class="fin-tx" id="tx-${t.id}">
           <div class="fin-tx-ico ${t.tipo==='entrada'?'e':'s'}">${t.tipo==='entrada'?'💚':'🔴'}</div>
           <div class="fin-tx-body">
             <div class="fin-tx-title">${t.desc}</div>
             <div class="fin-tx-cat">${FIN_CAT_LABELS[t.cat]||t.cat} · ${new Date(t.date+'T12:00:00').toLocaleDateString('pt-BR')}</div>
           </div>
-          <div class="fin-tx-val ${t.tipo==='entrada'?'e':'s'}">${t.tipo==='entrada'?'+':'-'}R$ ${t.val.toFixed(2).replace('.',',')}</div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div class="fin-tx-val ${t.tipo==='entrada'?'e':'s'}">${t.tipo==='entrada'?'+':'-'}R$ ${t.val.toFixed(2).replace('.',',')}</div>
+            <button onclick="editFinTx('${t.id}')" style="background:var(--pale);border:none;border-radius:7px;padding:5px 7px;cursor:pointer;font-size:12px;" title="Editar">✏️</button>
+            <button onclick="deleteFinTx('${t.id}')" style="background:#fef0f0;border:none;border-radius:7px;padding:5px 7px;cursor:pointer;font-size:12px;" title="Excluir">🗑️</button>
+          </div>
         </div>`).join(''):'<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px;">Nenhuma transação ainda</div>'}
     </div>
   </div>`;
@@ -882,6 +886,9 @@ function openFinOv(){
   document.getElementById('fFinVal').value='';
   document.getElementById('fFinDate').value=fmt(new Date());
   document.getElementById('fFinCat').value='salario';
+  // Garante botão original
+  const saveBtn=document.querySelector('#finOv .btn-g:last-of-type');
+  if(saveBtn){saveBtn.textContent='Salvar ✓';saveBtn.onclick=saveFinTx;}
   document.getElementById('finOv').classList.add('open');
 }
 function closeFinOv(ev){
@@ -902,7 +909,52 @@ function saveFinTx(){
   renderFinance();
 }
 
-function setPeriod(p){
+function deleteFinTx(id){
+  if(!confirm('Excluir essa transação?')) return;
+  finTxs=finTxs.filter(t=>t.id!==id);
+  saveFin();
+  showToast('🗑️ Transação excluída!');
+  renderFinance();
+}
+
+function editFinTx(id){
+  const tx=finTxs.find(t=>t.id===id);
+  if(!tx) return;
+  // Preenche o formulário com os dados da transação
+  curFinTipo=tx.tipo;
+  setFinTipo(tx.tipo);
+  document.getElementById('fFinDesc').value=tx.desc;
+  document.getElementById('fFinVal').value=tx.val;
+  document.getElementById('fFinDate').value=tx.date;
+  document.getElementById('fFinCat').value=tx.cat;
+  // Muda o botão de salvar para atualizar
+  const saveBtn=document.querySelector('[onclick="saveFinTx()"]');
+  if(saveBtn){
+    saveBtn.textContent='Atualizar ✓';
+    saveBtn.onclick=()=>updateFinTx(id);
+  }
+  document.getElementById('finOv').classList.add('open');
+}
+
+function updateFinTx(id){
+  const desc=document.getElementById('fFinDesc').value.trim();
+  const val=parseFloat(document.getElementById('fFinVal').value);
+  const date=document.getElementById('fFinDate').value;
+  const cat=document.getElementById('fFinCat').value;
+  if(!desc){showToast('⚠️ Informe a descrição');return;}
+  if(!val||val<=0){showToast('⚠️ Informe o valor');return;}
+  finTxs=finTxs.map(t=>t.id===id?{...t,desc,val,date,cat,tipo:curFinTipo}:t);
+  saveFin();
+  document.getElementById('finOv').classList.remove('open');
+  // Restaura botão original
+  const saveBtn=document.querySelector('[onclick*="updateFinTx"]');
+  if(saveBtn){
+    saveBtn.textContent='Salvar ✓';
+    saveBtn.onclick=saveFinTx;
+  }
+  showToast('✅ Transação atualizada!');
+  renderFinance();
+}
   document.querySelectorAll('.period-btn').forEach(b=>b.classList.toggle('active',b.dataset.p===p));
   vt=p;render();
 }
