@@ -1560,7 +1560,15 @@ if(isIOS && !isStandalone && !localStorage.getItem('df3_installed')){
 <script>
 const SUPA_URL = 'https://quycypnysdqifafzfili.supabase.co';
 const SUPA_KEY = 'sb_publishable_VtQ599vQGBvP5opaHGvaPg_UhsNYLgf';
-const supa = window.supabase ? window.supabase.createClient(SUPA_URL, SUPA_KEY) : null;
+const APP_URL = 'https://murilorodrigues406.github.io/dayflow/';
+const RESET_URL = 'https://murilorodrigues406.github.io/dayflow/';
+const supa = window.supabase ? window.supabase.createClient(SUPA_URL, SUPA_KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true
+  }
+}) : null;
 
 let currentUser = null;
 
@@ -1634,28 +1642,11 @@ function showAuthScreen(){
   `;
   document.body.appendChild(scr);
 
-  // Auto-preenche credenciais salvas
+  // Auto-preenche apenas o email salvo. A sessão fica guardada pelo próprio Supabase.
   const savedEmail=localStorage.getItem('df3_saved_email');
-  const savedPass=localStorage.getItem('df3_saved_pass');
-  if(savedEmail && savedPass){
+  if(savedEmail){
     document.getElementById('loginEmail').value=savedEmail;
-    document.getElementById('loginPass').value=savedPass;
     document.getElementById('rememberMe').checked=true;
-    // Login automático
-    setTimeout(async()=>{
-      const btn=document.getElementById('loginBtn');
-      if(btn){
-        btn.disabled=true;
-        btn.textContent='Entrando...';
-        const {data,error}=await supa.auth.signInWithPassword({email:savedEmail,password:savedPass});
-        if(!error && data.user){
-          await enterApp(data.user);
-        } else {
-          btn.disabled=false;
-          btn.textContent='Entrar →';
-        }
-      }
-    },800);
   }
 }
 
@@ -1681,13 +1672,11 @@ async function doLogin(){
   btn.disabled=true;btn.textContent='Entrando...';
   const {data,error}=await supa.auth.signInWithPassword({email,password:pass});
   if(error){showAuthError('Email ou senha incorretos!');btn.disabled=false;btn.textContent='Entrar →';return;}
-  // Salva credenciais se "lembrar de mim" estiver marcado
+  // Salva apenas o email se "lembrar de mim" estiver marcado
   if(remember){
     localStorage.setItem('df3_saved_email',email);
-    localStorage.setItem('df3_saved_pass',pass);
   } else {
     localStorage.removeItem('df3_saved_email');
-    localStorage.removeItem('df3_saved_pass');
   }
   await enterApp(data.user);
 }
@@ -1702,7 +1691,14 @@ async function doCadastro(){
   if(pass.length<6){showAuthError('Senha precisa ter pelo menos 6 caracteres!');return;}
   const btn=document.getElementById('cadBtn');
   btn.disabled=true;btn.textContent='Criando conta...';
-  const {data,error}=await supa.auth.signUp({email,password:pass});
+  const {data,error}=await supa.auth.signUp({
+    email,
+    password:pass,
+    options:{
+      emailRedirectTo: APP_URL,
+      data:{first_name:nome,last_name:sobrenome}
+    }
+  });
   if(error){showAuthError('Erro: '+error.message);btn.disabled=false;btn.textContent='Criar conta grátis →';return;}
   if(data.user){
     // Salva perfil no Supabase
@@ -1717,9 +1713,8 @@ async function doCadastro(){
     // Salva localmente também
     localStorage.setItem('df3_fn',nome);
     localStorage.setItem('df3_ln',sobrenome);
-    // Salva credenciais para login automático nas próximas vezes
+    // Salva apenas o email. O Supabase mantém a sessão com segurança.
     localStorage.setItem('df3_saved_email',email);
-    localStorage.setItem('df3_saved_pass',pass);
     await enterApp(data.user);
   }
 }
@@ -1727,8 +1722,9 @@ async function doCadastro(){
 async function doReset(){
   const email=document.getElementById('loginEmail').value.trim();
   if(!email){showAuthError('Digite seu email primeiro!');return;}
-  await supa.auth.resetPasswordForEmail(email);
-  showAuthError('✅ Email de redefinição enviado!');
+  const {error}=await supa.auth.resetPasswordForEmail(email,{redirectTo:RESET_URL});
+  if(error){showAuthError('Erro ao enviar redefinição: '+error.message);return;}
+  showAuthError('✅ Email de redefinição enviado! Abra o link e crie uma nova senha.');
 }
 
 async function enterApp(user){
@@ -1759,6 +1755,50 @@ async function enterApp(user){
   addLogoutBtn();
   // Solicita permissão de notificações após 5 segundos
   setTimeout(setupPushNotifications, 5000);
+}
+
+
+function isRecoveryLink(){
+  const urlText=window.location.href;
+  return urlText.includes('type=recovery') || urlText.includes('recovery');
+}
+
+function showResetPasswordScreen(){
+  document.querySelector('.app').style.display='none';
+  document.querySelector('.fab').style.display='none';
+  document.querySelector('.bnav').style.display='none';
+  document.getElementById('authScreen')?.remove();
+
+  const scr=document.createElement('div');
+  scr.id='authScreen';
+  scr.className='auth-screen';
+  scr.innerHTML=`
+    <div class="auth-logo"><span>DF</span></div>
+    <div class="auth-title">Nova senha</div>
+    <div class="auth-sub">Digite sua nova senha para voltar ao DayFlow.</div>
+    <div class="auth-box">
+      <div id="authError" class="auth-error"></div>
+      <input class="auth-input" id="newPass" type="password" placeholder="Nova senha (mín. 6 caracteres)"/>
+      <input class="auth-input" id="newPass2" type="password" placeholder="Repita a nova senha"/>
+      <button class="auth-btn" id="newPassBtn" onclick="doUpdatePassword()">Salvar nova senha →</button>
+      <div class="auth-footer">Depois disso você entra normalmente com email e senha.</div>
+    </div>
+  `;
+  document.body.appendChild(scr);
+}
+
+async function doUpdatePassword(){
+  const p1=document.getElementById('newPass').value;
+  const p2=document.getElementById('newPass2').value;
+  if(p1.length<6){showAuthError('A senha precisa ter pelo menos 6 caracteres.');return;}
+  if(p1!==p2){showAuthError('As senhas não conferem.');return;}
+  const btn=document.getElementById('newPassBtn');
+  btn.disabled=true;btn.textContent='Salvando...';
+  const {data,error}=await supa.auth.updateUser({password:p1});
+  if(error){showAuthError('Erro ao trocar senha: '+error.message);btn.disabled=false;btn.textContent='Salvar nova senha →';return;}
+  history.replaceState(null,'',APP_URL);
+  await enterApp(data.user);
+  showToast('✅ Senha alterada com sucesso!');
 }
 
 /* ── PUSH NOTIFICATIONS ─────────────────────────── */
@@ -1864,6 +1904,7 @@ async function doLogout(){
   localStorage.removeItem('df3_fn');
   localStorage.removeItem('df3_ln');
   localStorage.removeItem('df3_mo');
+  localStorage.removeItem('df3_saved_pass');
   document.querySelector('.app').style.display='none';
   document.querySelector('.fab').style.display='none';
   document.querySelector('.bnav').style.display='none';
@@ -1904,7 +1945,15 @@ function showTrialExpired(){
     }
 
     const {data:{session}}=await supa.auth.getSession();
-    if(session){
+    if(isRecoveryLink()){
+      if(session){
+        showResetPasswordScreen();
+      } else {
+        showAuthScreen();
+        showAuthError('Link de redefinição inválido ou expirado. Solicite outro email.');
+      }
+    } else if(session){
+      history.replaceState(null,'',APP_URL);
       await enterApp(session.user);
     } else {
       showAuthScreen();
