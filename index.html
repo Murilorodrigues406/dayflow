@@ -1270,125 +1270,6 @@ function loadName(){
   }
 }
 
-/* TELA DE BOAS-VINDAS — primeira vez */
-function showWelcome(){
-  // Esconde o app inteiro
-  document.querySelector('.app').style.display='none';
-  document.querySelector('.fab').style.display='none';
-  document.querySelector('.bnav').style.display='none';
-
-  const wel = document.createElement('div');
-  wel.id='welcomeScreen';
-  wel.style.cssText=`
-    position:fixed;inset:0;z-index:9999;
-    background:linear-gradient(160deg,#eef5f0 0%,#f7faf8 50%,#dcebe2 100%);
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    padding:32px 28px;font-family:'Cabinet Grotesk',sans-serif;
-  `;
-  wel.innerHTML=`
-    <!-- Logo -->
-    <div style="width:80px;height:80px;border-radius:22px;background:#0d4f2c;
-      display:flex;align-items:center;justify-content:center;margin-bottom:24px;
-      box-shadow:0 8px 32px rgba(26,122,74,.3);">
-      <span style="font-family:'Clash Display',sans-serif;font-weight:800;font-size:28px;color:#fff;letter-spacing:-1px;">DF</span>
-    </div>
-
-    <!-- Título -->
-    <div style="font-family:'Clash Display',sans-serif;font-weight:800;font-size:32px;
-      color:#0a1f12;letter-spacing:-1px;margin-bottom:6px;text-align:center;">
-      Bem-vindo ao
-    </div>
-    <div style="font-family:'Clash Display',sans-serif;font-weight:800;font-size:32px;
-      color:#0d4f2c;letter-spacing:-1px;margin-bottom:10px;">
-      DayFlow 🌿
-    </div>
-    <div style="font-size:14px;color:#2d4234;text-align:center;margin-bottom:36px;line-height:1.5;font-weight:400;">
-      Seu planejador de vida completo.<br>Vamos personalizar para você!
-    </div>
-
-    <!-- Formulário -->
-    <div style="width:100%;max-width:340px;display:flex;flex-direction:column;gap:12px;">
-
-      <div>
-        <div style="font-size:10px;font-weight:800;color:#2d4234;letter-spacing:1px;
-          text-transform:uppercase;margin-bottom:6px;">Seu primeiro nome</div>
-        <input id="wFirstName" type="text" placeholder="Ex: João" maxlength="30"
-          style="width:100%;background:#fff;border:2px solid #d3e4d8;border-radius:12px;
-          padding:13px 16px;color:#0a1f12;font-family:'Cabinet Grotesk',sans-serif;
-          font-size:16px;outline:none;transition:border-color .2s;"
-          onfocus="this.style.borderColor='#0d4f2c'"
-          onblur="this.style.borderColor='#d3e4d8'"/>
-      </div>
-
-      <div>
-        <div style="font-size:10px;font-weight:800;color:#2d4234;letter-spacing:1px;
-          text-transform:uppercase;margin-bottom:6px;">Sobrenome (opcional)</div>
-        <input id="wLastName" type="text" placeholder="Ex: Silva" maxlength="30"
-          style="width:100%;background:#fff;border:2px solid #d3e4d8;border-radius:12px;
-          padding:13px 16px;color:#0a1f12;font-family:'Cabinet Grotesk',sans-serif;
-          font-size:16px;outline:none;transition:border-color .2s;"
-          onfocus="this.style.borderColor='#0d4f2c'"
-          onblur="this.style.borderColor='#d3e4d8'"/>
-      </div>
-
-      <div>
-        <div style="font-size:10px;font-weight:800;color:#2d4234;letter-spacing:1px;
-          text-transform:uppercase;margin-bottom:6px;">Sua frase do dia (opcional)</div>
-        <input id="wMotiv" type="text" placeholder="Ex: Foco, força e fé!" maxlength="60"
-          style="width:100%;background:#fff;border:2px solid #d3e4d8;border-radius:12px;
-          padding:13px 16px;color:#0a1f12;font-family:'Cabinet Grotesk',sans-serif;
-          font-size:16px;outline:none;transition:border-color .2s;"
-          onfocus="this.style.borderColor='#0d4f2c'"
-          onblur="this.style.borderColor='#d3e4d8'"/>
-      </div>
-
-      <button onclick="finishWelcome()"
-        style="width:100%;background:#0d4f2c;color:#fff;border:none;border-radius:12px;
-        padding:15px;font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:16px;
-        cursor:pointer;margin-top:8px;box-shadow:0 6px 20px rgba(26,122,74,.35);
-        transition:opacity .2s;">
-        Começar meu DayFlow →
-      </button>
-
-    </div>
-
-    <div style="margin-top:24px;font-size:11px;color:#5a7568;text-align:center;">
-      Seus dados ficam salvos só no seu celular 🔒
-    </div>
-  `;
-  document.body.appendChild(wel);
-
-  // Foca no primeiro campo
-  setTimeout(()=>document.getElementById('wFirstName').focus(),300);
-}
-
-function finishWelcome(){
-  const fn = document.getElementById('wFirstName').value.trim();
-  if(!fn){ 
-    document.getElementById('wFirstName').style.borderColor='#e0184e';
-    document.getElementById('wFirstName').placeholder='Informe seu nome!';
-    return;
-  }
-  const ln = document.getElementById('wLastName').value.trim();
-  const mo = document.getElementById('wMotiv').value.trim();
-  localStorage.setItem('df3_fn',fn);
-  localStorage.setItem('df3_ln',ln);
-  localStorage.setItem('df3_mo',mo);
-  applyName(fn,ln,mo);
-
-  // Animação de saída
-  const wel=document.getElementById('welcomeScreen');
-  wel.style.transition='opacity .4s';
-  wel.style.opacity='0';
-  setTimeout(()=>{
-    wel.remove();
-    document.querySelector('.app').style.display='';
-    document.querySelector('.fab').style.display='';
-    document.querySelector('.bnav').style.display='';
-    showToast('🌿 Bem-vindo, '+fn+'!');
-  },400);
-}
-
 /* GCAL */
 function toggleGcal(){
   if(!gcalOn){showToast('🔗 Conectando...');setTimeout(()=>{gcalOn=true;localStorage.setItem('df3_gcal','1');updGcal();showToast('✅ Google Calendar conectado!');},1600);}
@@ -1571,6 +1452,7 @@ const supa = window.supabase ? window.supabase.createClient(SUPA_URL, SUPA_KEY, 
 }) : null;
 
 let currentUser = null;
+let isRecoveryFlow = false;
 
 /* ── ESTILOS DA AUTH ── */
 const authStyles = `
@@ -1602,6 +1484,9 @@ function showAuthScreen(){
   document.querySelector('.app').style.display='none';
   document.querySelector('.fab').style.display='none';
   document.querySelector('.bnav').style.display='none';
+
+  // Remove auth screen anterior se existir
+  document.getElementById('authScreen')?.remove();
 
   const scr=document.createElement('div');
   scr.id='authScreen';
@@ -1757,12 +1642,6 @@ async function enterApp(user){
   setTimeout(setupPushNotifications, 5000);
 }
 
-
-function isRecoveryLink(){
-  const urlText=window.location.href;
-  return urlText.includes('type=recovery') || urlText.includes('recovery');
-}
-
 function showResetPasswordScreen(){
   document.querySelector('.app').style.display='none';
   document.querySelector('.fab').style.display='none';
@@ -1794,11 +1673,16 @@ async function doUpdatePassword(){
   if(p1!==p2){showAuthError('As senhas não conferem.');return;}
   const btn=document.getElementById('newPassBtn');
   btn.disabled=true;btn.textContent='Salvando...';
-  const {data,error}=await supa.auth.updateUser({password:p1});
+  const {error}=await supa.auth.updateUser({password:p1});
   if(error){showAuthError('Erro ao trocar senha: '+error.message);btn.disabled=false;btn.textContent='Salvar nova senha →';return;}
+  // CRÍTICO: desloga após troca de senha para invalidar o token de recuperação
+  // Isso impede que o dispositivo de quem clicou no link fique logado automaticamente
+  await supa.auth.signOut();
+  isRecoveryFlow=false;
   history.replaceState(null,'',APP_URL);
-  await enterApp(data.user);
-  showToast('✅ Senha alterada com sucesso!');
+  document.getElementById('authScreen')?.remove();
+  showAuthScreen();
+  showToast('✅ Senha alterada! Faça login com a nova senha.');
 }
 
 /* ── PUSH NOTIFICATIONS ─────────────────────────── */
@@ -1937,34 +1821,47 @@ function showTrialExpired(){
   document.body.appendChild(exp);
 }
 
-/* ── INIT AUTH CORRIGIDO ── */
-(async()=>{
-  try{
-    if(!window.supabase || !supa){
+/* ── INIT AUTH — DETECTA RECOVERY VIA EVENTO OFICIAL ── */
+// Listener captura o evento PASSWORD_RECOVERY ANTES de qualquer login automático
+// Isso é essencial: o Supabase emite esse evento APENAS quando o link é de redefinição,
+// permitindo distinguir entre "login normal" e "abriu link de recovery"
+if(supa){
+  supa.auth.onAuthStateChange((event, session) => {
+    if (event === 'PASSWORD_RECOVERY') {
+      isRecoveryFlow = true;
+      document.getElementById('authScreen')?.remove();
+      showResetPasswordScreen();
+    }
+  });
+}
+
+(async () => {
+  try {
+    if (!window.supabase || !supa) {
       throw new Error('Supabase não carregou');
     }
 
-    const {data:{session}}=await supa.auth.getSession();
-    if(isRecoveryLink()){
-      if(session){
-        showResetPasswordScreen();
-      } else {
-        showAuthScreen();
-        showAuthError('Link de redefinição inválido ou expirado. Solicite outro email.');
-      }
-    } else if(session){
-      history.replaceState(null,'',APP_URL);
+    // Aguarda o onAuthStateChange disparar caso seja link de recovery
+    // Sem esse delay, o getSession() abaixo poderia rodar antes do evento PASSWORD_RECOVERY chegar
+    await new Promise(r => setTimeout(r, 400));
+
+    if (isRecoveryFlow) {
+      // Já está mostrando tela de nova senha — não faz nada
+      return;
+    }
+
+    const { data: { session } } = await supa.auth.getSession();
+
+    if (session) {
+      history.replaceState(null, '', APP_URL);
       await enterApp(session.user);
     } else {
       showAuthScreen();
     }
-  }catch(e){
+  } catch (e) {
     console.error('Erro ao iniciar autenticação:', e);
-    // Segurança para não deixar a página branca caso o Supabase falhe
-    document.querySelector('.app').style.display='';
-    document.querySelector('.fab').style.display='';
-    document.querySelector('.bnav').style.display='';
-    showToast('⚠️ App aberto em modo teste. Verifique o Supabase.');
+    showAuthScreen();
+    showToast('⚠️ Erro ao conectar.');
   }
 })();
 </script>
