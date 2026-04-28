@@ -1185,18 +1185,34 @@ function advStage(){
 function trigAvatar(){document.getElementById('avatarInput').click();}
 function loadAvatar(ev){
   const file=ev.target.files[0];if(!file)return;
+  // Limita tamanho a ~500KB pra não estourar limites do banco
+  if(file.size > 800000){
+    showToast('⚠️ Foto muito grande! Use uma menor que 800KB');
+    return;
+  }
   const r=new FileReader();
-  r.onload=e=>{
-    // header avatar
-    document.getElementById('avImg').src=e.target.result;
+  r.onload=async e=>{
+    const dataUrl=e.target.result;
+    // Atualiza UI imediatamente
+    document.getElementById('avImg').src=dataUrl;
     document.getElementById('avImg').style.display='block';
     document.getElementById('avPh').style.display='none';
-    // perfil avatar
-    document.getElementById('perfAvImg').src=e.target.result;
+    document.getElementById('perfAvImg').src=dataUrl;
     document.getElementById('perfAvImg').style.display='block';
     document.getElementById('perfAvPh').style.display='none';
-    localStorage.setItem('df3_av',e.target.result);
-    showToast('📷 Foto atualizada!');
+    // Salva no localStorage (cache rápido)
+    localStorage.setItem('df3_av',dataUrl);
+    // Salva no Supabase pra não perder ao trocar de celular
+    if(currentUser && supa){
+      try{
+        await supa.from('profiles').update({avatar_url:dataUrl}).eq('id',currentUser.id);
+        showToast('📷 Foto salva!');
+      }catch(err){
+        showToast('📷 Foto salva no celular');
+      }
+    } else {
+      showToast('📷 Foto atualizada!');
+    }
   };
   r.readAsDataURL(file);
 }
@@ -1234,13 +1250,26 @@ function closePerf(ev){
   if(ev&&ev.target!==document.getElementById('perfOv'))return;
   document.getElementById('perfOv').classList.remove('open');
 }
-function savePerf(){
+async function savePerf(){
   const fn=document.getElementById('pFirstName').value.trim()||'Usuário';
   const ln=document.getElementById('pLastName').value.trim();
   const mo=document.getElementById('pMotivation').value.trim();
+  // Salva localmente (cache rápido)
   localStorage.setItem('df3_fn',fn);
   localStorage.setItem('df3_ln',ln);
   localStorage.setItem('df3_mo',mo);
+  // Salva no Supabase pra persistir entre dispositivos
+  if(currentUser && supa){
+    try{
+      await supa.from('profiles').update({
+        first_name:fn,
+        last_name:ln,
+        motivation:mo
+      }).eq('id',currentUser.id);
+    }catch(err){
+      console.warn('Não foi possível salvar perfil no Supabase:',err);
+    }
+  }
   applyName(fn,ln,mo);
   document.getElementById('perfOv').classList.remove('open');
   showToast('✅ Perfil atualizado!');
@@ -1285,7 +1314,7 @@ let _tt;
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),2500);}
 
 /* INIT */
-seed();
+// seed() removido daqui — só roda dentro de enterApp() após login válido
 const av=localStorage.getItem('df3_av');
 if(av){
   document.getElementById('avImg').src=av;
@@ -1613,35 +1642,86 @@ async function doReset(){
 
 async function enterApp(user){
   currentUser=user;
-  // CRÍTICO: Limpa dados de qualquer usuário anterior do localStorage
-  // Isso impede que nome/foto de outro usuário "vaze" para o atual
-  localStorage.removeItem('df3_fn');
-  localStorage.removeItem('df3_ln');
-  localStorage.removeItem('df3_mo');
-  localStorage.removeItem('df3_av');
-  // Carrega perfil do Supabase
-  const {data:profile}=await supa.from('profiles').select('*').eq('id',user.id).single();
+  // SEGURANÇA: só limpa localStorage se for um usuário DIFERENTE do anterior
+  // Isso evita que dados de outro usuário "vazem", mas mantém a foto/nome
+  // de quem está logando de novo no mesmo dispositivo
+  const lastUserId=localStorage.getItem('df3_last_uid');
+  if(lastUserId && lastUserId!==user.id){
+    // Trocou de usuário — limpa tudo do anterior
+    localStorage.removeItem('df3_fn');
+    localStorage.removeItem('df3_ln');
+    localStorage.removeItem('df3_mo');
+    localStorage.removeItem('df3_av');
+    localStorage.removeItem('df3_evs');
+    localStorage.removeItem('df3_fin');
+  }
+  // Marca o usuário atual
+  localStorage.setItem('df3_last_uid',user.id);
+
+  // Carrega perfil completo do Supabase (fonte da verdade)
+  let profile=null;
+  try{
+    const {data}=await supa.from('profiles').select('*').eq('id',user.id).single();
+    profile=data;
+  }catch(err){
+    console.warn('Erro ao buscar perfil:',err);
+  }
+
   if(profile){
-    localStorage.setItem('df3_fn',profile.first_name||'');
-    localStorage.setItem('df3_ln',profile.last_name||'');
-    localStorage.setItem('df3_mo',profile.motivation||'');
+    // Sincroniza dados do Supabase para o localStorage
+    if(profile.first_name) localStorage.setItem('df3_fn',profile.first_name);
+    if(profile.last_name) localStorage.setItem('df3_ln',profile.last_name);
+    if(profile.motivation) localStorage.setItem('df3_mo',profile.motivation);
+    if(profile.avatar_url) localStorage.setItem('df3_av',profile.avatar_url);
     // Verifica trial
-    const trialStart=new Date(profile.trial_start);
-    const diasPassados=Math.floor((new Date()-trialStart)/86400000);
-    if(profile.plan==='trial' && diasPassados>7){
-      showTrialExpired();return;
+    if(profile.trial_start){
+      const trialStart=new Date(profile.trial_start);
+      const diasPassados=Math.floor((new Date()-trialStart)/86400000);
+      if(profile.plan==='trial' && diasPassados>7){
+        showTrialExpired();return;
+      }
     }
   } else {
-    // Não achou perfil — usa metadados do user (nome do cadastro)
+    // Perfil não existe no Supabase — cria com base no metadata do user
     const meta=user.user_metadata||{};
-    localStorage.setItem('df3_fn',meta.first_name||'');
-    localStorage.setItem('df3_ln',meta.last_name||'');
+    const fn=meta.first_name||localStorage.getItem('df3_fn')||'';
+    const ln=meta.last_name||localStorage.getItem('df3_ln')||'';
+    if(fn) localStorage.setItem('df3_fn',fn);
+    if(ln) localStorage.setItem('df3_ln',ln);
+    // Tenta criar perfil agora
+    try{
+      await supa.from('profiles').upsert({
+        id:user.id,
+        first_name:fn,
+        last_name:ln,
+        trial_start:new Date().toISOString(),
+        plan:'trial',
+        is_active:true
+      });
+    }catch(err){console.warn('Erro ao criar perfil:',err);}
   }
-  // Reseta avatar visual antes de carregar o novo
-  document.getElementById('avImg').style.display='none';
-  document.getElementById('avPh').style.display='';
-  document.getElementById('perfAvImg').style.display='none';
-  document.getElementById('perfAvPh').style.display='';
+
+  // Atualiza UI da foto a partir do localStorage (que pode vir do Supabase ou cache)
+  const av=localStorage.getItem('df3_av');
+  if(av){
+    document.getElementById('avImg').src=av;
+    document.getElementById('avImg').style.display='block';
+    document.getElementById('avPh').style.display='none';
+    document.getElementById('perfAvImg').src=av;
+    document.getElementById('perfAvImg').style.display='block';
+    document.getElementById('perfAvPh').style.display='none';
+  } else {
+    document.getElementById('avImg').style.display='none';
+    document.getElementById('avPh').style.display='';
+    document.getElementById('perfAvImg').style.display='none';
+    document.getElementById('perfAvPh').style.display='';
+  }
+
+  // Recarrega arrays (tarefas e finanças) do localStorage
+  evs=JSON.parse(localStorage.getItem('df3_evs')||'[]');
+  finTxs=JSON.parse(localStorage.getItem('df3_fin')||'[]');
+  // Cria tarefas exemplo apenas se for usuário NOVO sem nenhuma tarefa
+  if(evs.length===0) seed();
   // Remove tela de auth
   const scr=document.getElementById('authScreen');
   if(scr){scr.style.transition='opacity .3s';scr.style.opacity='0';setTimeout(()=>scr.remove(),300);}
@@ -1800,10 +1880,19 @@ function addLogoutBtn(){
 async function doLogout(){
   await supa.auth.signOut();
   currentUser=null;
+  // Limpeza completa — remove TODOS os dados do app do localStorage
   localStorage.removeItem('df3_fn');
   localStorage.removeItem('df3_ln');
   localStorage.removeItem('df3_mo');
+  localStorage.removeItem('df3_av');
+  localStorage.removeItem('df3_evs');
+  localStorage.removeItem('df3_fin');
+  localStorage.removeItem('df3_saved_email');
   localStorage.removeItem('df3_saved_pass');
+  localStorage.removeItem('df3_last_uid');
+  // Reseta arrays em memória também
+  evs=[];
+  finTxs=[];
   document.querySelector('.app').style.display='none';
   document.querySelector('.fab').style.display='none';
   document.querySelector('.bnav').style.display='none';
@@ -1844,6 +1933,10 @@ if(supa){
   supa.auth.onAuthStateChange((event, session) => {
     if (event === 'PASSWORD_RECOVERY') {
       isRecoveryFlow = true;
+      // Esconde o app principal — a tela de nova senha não mostra dados do usuário
+      document.querySelector('.app').style.display='none';
+      document.querySelector('.fab').style.display='none';
+      document.querySelector('.bnav').style.display='none';
       document.getElementById('authScreen')?.remove();
       showResetPasswordScreen();
     }
