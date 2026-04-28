@@ -381,7 +381,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;bac
     </div>
     <div class="user-info">
       <div class="greet" id="greetTxt">Bom dia,</div>
-      <div class="uname" id="unameEl">Murilo <span id="unameSpan">Rodrigues</span></div>
+      <div class="uname" id="unameEl">Carregando...</div>
     </div>
     <div class="dbadge">
       <div class="dn" id="hDN"></div>
@@ -622,7 +622,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;bac
       <div style="font-size:10px;font-weight:800;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Pré-visualização</div>
       <div style="font-size:11px;color:var(--text2);margin-bottom:2px;" id="prevGreet">Bom dia,</div>
       <div style="font-family:'Clash Display',sans-serif;font-weight:700;font-size:18px;color:var(--text);">
-        <span id="prevFirst">Murilo</span> <span style="color:var(--grn);" id="prevLast">Rodrigues</span>
+        <span id="prevFirst">Seu nome</span> <span style="color:var(--grn);" id="prevLast">aqui</span>
       </div>
       <div style="font-size:11px;color:var(--grn2);margin-top:6px;font-style:italic;" id="prevMotiv"></div>
     </div>
@@ -1203,8 +1203,8 @@ function loadAvatar(ev){
 
 /* PERFIL */
 function openPerf(){
-  const fn=localStorage.getItem('df3_fn')||'Murilo';
-  const ln=localStorage.getItem('df3_ln')||'Rodrigues';
+  const fn=localStorage.getItem('df3_fn')||'';
+  const ln=localStorage.getItem('df3_ln')||'';
   const mo=localStorage.getItem('df3_mo')||'';
   document.getElementById('pFirstName').value=fn;
   document.getElementById('pLastName').value=ln;
@@ -1246,10 +1246,11 @@ function savePerf(){
   showToast('✅ Perfil atualizado!');
 }
 function applyName(fn,ln,mo){
-  // header
-  const first=fn||'Usuário';
+  // header — se não tem nome, mostra "Olá!" como fallback neutro
+  const first=fn||'Olá';
   const last=ln||'';
-  document.getElementById('unameEl').innerHTML=`${first}${last?' <span id="unameSpan">'+last+'</span>':''}`;
+  const html = first + (last ? ' <span style="color:var(--grn);">'+last+'</span>' : (fn?'':'!'));
+  document.getElementById('unameEl').innerHTML=html;
   // frase motivacional abaixo do nome (cria/atualiza elemento)
   let motivEl=document.getElementById('motivLine');
   if(!motivEl){
@@ -1262,12 +1263,10 @@ function applyName(fn,ln,mo){
 }
 
 function loadName(){
-  const fn=localStorage.getItem('df3_fn');
-  const ln=localStorage.getItem('df3_ln');
-  const mo=localStorage.getItem('df3_mo');
-  if(fn){
-    applyName(fn,ln||'',mo||'');
-  }
+  const fn=localStorage.getItem('df3_fn')||'';
+  const ln=localStorage.getItem('df3_ln')||'';
+  const mo=localStorage.getItem('df3_mo')||'';
+  applyName(fn,ln,mo);
 }
 
 /* GCAL */
@@ -1614,6 +1613,12 @@ async function doReset(){
 
 async function enterApp(user){
   currentUser=user;
+  // CRÍTICO: Limpa dados de qualquer usuário anterior do localStorage
+  // Isso impede que nome/foto de outro usuário "vaze" para o atual
+  localStorage.removeItem('df3_fn');
+  localStorage.removeItem('df3_ln');
+  localStorage.removeItem('df3_mo');
+  localStorage.removeItem('df3_av');
   // Carrega perfil do Supabase
   const {data:profile}=await supa.from('profiles').select('*').eq('id',user.id).single();
   if(profile){
@@ -1626,7 +1631,17 @@ async function enterApp(user){
     if(profile.plan==='trial' && diasPassados>7){
       showTrialExpired();return;
     }
+  } else {
+    // Não achou perfil — usa metadados do user (nome do cadastro)
+    const meta=user.user_metadata||{};
+    localStorage.setItem('df3_fn',meta.first_name||'');
+    localStorage.setItem('df3_ln',meta.last_name||'');
   }
+  // Reseta avatar visual antes de carregar o novo
+  document.getElementById('avImg').style.display='none';
+  document.getElementById('avPh').style.display='';
+  document.getElementById('perfAvImg').style.display='none';
+  document.getElementById('perfAvPh').style.display='';
   // Remove tela de auth
   const scr=document.getElementById('authScreen');
   if(scr){scr.style.transition='opacity .3s';scr.style.opacity='0';setTimeout(()=>scr.remove(),300);}
