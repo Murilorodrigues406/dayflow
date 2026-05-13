@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="refresh" content="3; url=https://murilorodrigues406.github.io/Numer/">
+  <title>Numer — Redirecionando...</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      background:#0B1628;
+      font-family:'DM Sans',sans-serif;
+      color:#fff;
+      min-height:100vh;
+      display:flex;align-items:center;justify-content:center;
+      flex-direction:column;text-align:center;padding:24px;
+    }
+    body::before{
+      content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+      background:radial-gradient(circle at 70% 20%, rgba(242,107,29,.12) 0%, transparent 60%),
+                 radial-gradient(circle at 20% 80%, rgba(46,66,112,.3) 0%, transparent 60%);
+    }
+    .card{
+      position:relative;z-index:1;
+      background:#0F1C35;
+      border:1px solid rgba(242,107,29,.2);
+      border-radius:24px;
+      padding:40px 32px;
+      max-width:340px;
+      width:100%;
+      box-shadow:0 20px 60px rgba(0,0,0,.4);
+    }
+    .logo{
+      width:64px;height:64px;border-radius:18px;
+      background:#1A2B4A;border:2px solid rgba(242,107,29,.3);
+      display:flex;align-items:center;justify-content:center;
+      font-family:'Syne',sans-serif;font-weight:800;font-size:28px;color:#F26B1D;
+      margin:0 auto 20px;
+    }
+    h1{
+      font-family:'Syne',sans-serif;font-weight:800;font-size:22px;
+      letter-spacing:-.5px;margin-bottom:10px;
+    }
+    p{font-size:14px;color:rgba(255,255,255,.6);line-height:1.6;margin-bottom:28px;}
+    .spinner{
+      width:40px;height:40px;border-radius:50%;
+      border:3px solid rgba(242,107,29,.2);
+      border-top-color:#F26B1D;
+      animation:spin 1s linear infinite;
+      margin:0 auto 20px;
+    }
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .btn{
+      display:block;width:100%;
+      background:linear-gradient(135deg,#F26B1D,#D45A10);
+      color:#fff;text-decoration:none;
+      padding:14px;border-radius:12px;
+      font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;
+      box-shadow:0 4px 20px rgba(242,107,29,.35);
+      transition:all .2s;
+    }
+    .btn:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(242,107,29,.5);}
+    .note{font-size:11px;color:rgba(255,255,255,.25);margin-top:14px;}
+  </style>
+  <script>
+    // Redireciona imediatamente via JS
+    window.location.replace('https://murilorodrigues406.github.io/Numer/');
+  </script>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">N</div>
+    <h1>O Numer mudou!</h1>
+    <p>Atualizamos o endereço do app. Você será redirecionado automaticamente em instantes.</p>
+    <div class="spinner"></div>
+    <a href="https://murilorodrigues406.github.io/Numer/" class="btn">
+      Ir para o Numer →
+    </a>
+    <p class="note">Se não redirecionar, toque no botão acima.</p>
+  </div>
+</body>
+</html>
